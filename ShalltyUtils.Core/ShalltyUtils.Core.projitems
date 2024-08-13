@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>628f4ed7-33df-4359-bc62-208410823ebd</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>ShalltyUtils</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ShalltyUtils.MeshSequencer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShalltyUtils.QuickMenu.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShalltyUtils.KeyframesGroups.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShalltyUtils.FolderConstraintsRig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShalltyUtils.SceneController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShalltyUtils.GuideObjectPicker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShalltyUtils.MotionPath.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShalltyUtils.PerformanceMode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShalltyUtils.GraphEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShalltyUtils.UI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShalltyUtils.UndoRedo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShalltyUtils.Hooks.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShalltyUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineBaking\ShalltyUtils.BakeDynamicBones.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineBaking\ShalltyUtils.BakeRoutes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineBaking\ShalltyUtils.BakeCustom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineBaking\ShalltyUtils.BakeAnimation.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\guideObjectPickerNode.png" />
+  </ItemGroup>
+</Project>
