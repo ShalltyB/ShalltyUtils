@@ -1024,7 +1024,7 @@ namespace ShalltyUtils
             return oci != null && oci.guideObject != null && oci.guideObject.transformTarget != null && oci.guideObject.transformTarget.GetComponent<PoseController>() != null;
         }
 
-        private static object GetParameter(ObjectCtrlInfo oci)
+        public static object GetParameter(ObjectCtrlInfo oci)
         {
             PoseController controller = oci.guideObject.transformTarget.GetComponent<PoseController>();
             return new HashedPair<BonesEditor, Transform>(controller._bonesEditor, controller._bonesEditor._boneTarget);

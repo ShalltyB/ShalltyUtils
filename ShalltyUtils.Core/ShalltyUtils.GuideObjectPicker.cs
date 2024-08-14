@@ -722,15 +722,7 @@ namespace ShalltyUtils
                 Vector3 point = goPickerNodesLine.points3[i];
                 Vector3 screenPoint = Camera.main.WorldToScreenPoint(point);
 
-                // Convert from pixels to points
-                float dpi = Screen.dpi;
-                float pixelsPerPoint = dpi / 96f; // Assuming 96 DPI as the standard reference
-                Vector2 screenPointInPoints = new Vector2(screenPoint.x / pixelsPerPoint, screenPoint.y / pixelsPerPoint);
-
-                // Invert Y-axis to match GUI space
-                Vector2 invertedScreenPointInPoints = new Vector2(screenPointInPoints.x, Screen.height / pixelsPerPoint - screenPointInPoints.y);
-
-                Vector2 finalScreenPointInPointsWithOffset = invertedScreenPointInPoints;
+                Vector2 finalScreenPointInPointsWithOffset = new Vector2(screenPoint.x, Screen.height - screenPoint.y);
 
                 if (selectionRect.Contains(finalScreenPointInPointsWithOffset))
                 {

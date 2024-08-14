@@ -177,9 +177,9 @@ namespace ShalltyUtils
 
                 if (GUILayout.Button("All Transform"))
                 {
-                    InsertKeyframeToSelectedGO("bonePos");
-                    InsertKeyframeToSelectedGO("boneRot");
-                    InsertKeyframeToSelectedGO("boneScale");
+                    InsertKeyframeToSelectedKKPEBone("bonePos");
+                    InsertKeyframeToSelectedKKPEBone("boneRot");
+                    InsertKeyframeToSelectedKKPEBone("boneScale");
                 }
 
                 if (GUILayout.Button("Position"))
@@ -192,17 +192,17 @@ namespace ShalltyUtils
                 GUI.color = Color.red;
                 if (GUILayout.Button("X"))
                 {
-                    InsertKeyframeToSelectedKKPEBone("boneXPos");
+                    InsertKeyframeToSelectedSplitKKPEBone("boneXPos");
                 }
                 GUI.color = Color.green;
                 if (GUILayout.Button("Y"))
                 {
-                    InsertKeyframeToSelectedKKPEBone("boneYPos");
+                    InsertKeyframeToSelectedSplitKKPEBone("boneYPos");
                 }
                 GUI.color = Color.blue;
                 if (GUILayout.Button("Z"))
                 {
-                    InsertKeyframeToSelectedKKPEBone("boneZPos");
+                    InsertKeyframeToSelectedSplitKKPEBone("boneZPos");
                 }
                 GUILayout.EndHorizontal();
 
@@ -221,17 +221,17 @@ namespace ShalltyUtils
                 GUI.color = Color.red;
                 if (GUILayout.Button("X"))
                 {
-                    InsertKeyframeToSelectedKKPEBone("boneXRot");
+                    InsertKeyframeToSelectedSplitKKPEBone("boneXRot");
                 }
                 GUI.color = Color.green;
                 if (GUILayout.Button("Y"))
                 {
-                    InsertKeyframeToSelectedKKPEBone("boneYRot");
+                    InsertKeyframeToSelectedSplitKKPEBone("boneYRot");
                 }
                 GUI.color = Color.blue;
                 if (GUILayout.Button("Z"))
                 {
-                    InsertKeyframeToSelectedKKPEBone("boneZRot");
+                    InsertKeyframeToSelectedSplitKKPEBone("boneZRot");
                 }
                 GUILayout.EndHorizontal();
 
@@ -250,17 +250,17 @@ namespace ShalltyUtils
                 GUI.color = Color.red;
                 if (GUILayout.Button("X"))
                 {
-                    InsertKeyframeToSelectedKKPEBone("boneXScale");
+                    InsertKeyframeToSelectedSplitKKPEBone("boneXScale");
                 }
                 GUI.color = Color.green;
                 if (GUILayout.Button("Y"))
                 {
-                    InsertKeyframeToSelectedKKPEBone("boneYScale");
+                    InsertKeyframeToSelectedSplitKKPEBone("boneYScale");
                 }
                 GUI.color = Color.blue;
                 if (GUILayout.Button("Z"))
                 {
-                    InsertKeyframeToSelectedKKPEBone("boneZScale");
+                    InsertKeyframeToSelectedSplitKKPEBone("boneZScale");
                 }
                 GUI.color = defColor;
                 GUILayout.EndHorizontal();
@@ -347,7 +347,44 @@ namespace ShalltyUtils
 
             if (!newInterpolable.keyframes.ContainsKey(time))
             {
-                _self.ExecuteDelayed2(() => _timeline.AddKeyframe(newInterpolable, time), 2);
+                _self.ExecuteDelayedFixed(() => _timeline.AddKeyframe(newInterpolable, time), 2);
+            }
+            else
+            {
+                _timeline.DeleteKeyframes(new List<KeyValuePair<float, Keyframe>> { new KeyValuePair<float, Keyframe>(time, newInterpolable.keyframes[time]) }, false);
+                _timeline.AddKeyframe(newInterpolable, time);
+            }
+
+            _timeline.UpdateInterpolablesView();
+        }
+
+        private static void InsertKeyframeToSelectedSplitKKPEBone(string interpolableID)
+        {
+            if (selectedObjects == null || selectedObjects.Count() == 0) return;
+
+            var parameterOci = selectedObjects.FirstOrDefault();
+            if (parameterOci == null) return;
+
+            var parameter = GetParameter(parameterOci);
+
+            InterpolableModel model = _timeline._interpolableModelsList.Find(i => i.id == interpolableID);
+
+            Interpolable newInterpolable = new Interpolable(parameterOci, parameter, model);
+
+            float time = _timeline._playbackTime;
+
+            if (!_timeline._interpolables.ContainsKey(newInterpolable.GetHashCode()))
+            {
+                _timeline._interpolables.Add(newInterpolable.GetHashCode(), newInterpolable);
+                _timeline._interpolablesTree.AddLeaf(newInterpolable);
+            }
+            else
+                newInterpolable = _timeline._interpolables[newInterpolable.GetHashCode()];
+
+
+            if (!newInterpolable.keyframes.ContainsKey(time))
+            {
+                _self.ExecuteDelayedFixed(() => _timeline.AddKeyframe(newInterpolable, time), 2);
             }
             else
             {

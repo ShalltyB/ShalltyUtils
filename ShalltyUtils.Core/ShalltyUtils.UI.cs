@@ -756,12 +756,12 @@ namespace ShalltyUtils
 
             #endregion
 
-            #region Cleanup Timeline Data
+            #region Delete Timeline Data
 
-            var buttonClearTimeline = UIUtility.CreateButton("ShalltyUtilsButton", verticalLayout, "Cleanup Timeline");
+            var buttonClearTimeline = UIUtility.CreateButton("ShalltyUtilsButton", verticalLayout, "Delete Timeline Data");
             buttonClearTimeline.gameObject.AddComponent<LayoutElement>().preferredHeight = 30f;
             buttonClearTimeline.onClick.AddListener(() => { CleanupAllTimeline(); });
-            CreateTooltip(buttonClearTimeline.gameObject, "Remove ALL the Timeline data from this scene, and resets timeline variables.", 500f, 30f);
+            CreateTooltip(buttonClearTimeline.gameObject, "Delete ALL the Timeline data from this scene, and resets timeline variables.", 500f, 30f);
             ((RectTransform)buttonClearTimeline.GetComponentInChildren<Text>().transform).sizeDelta = new Vector2(-20f, -10f);
 
             #endregion
@@ -795,7 +795,6 @@ namespace ShalltyUtils
             ((RectTransform)buttonMeshSequence.GetComponentInChildren<Text>().transform).sizeDelta = new Vector2(-20f, -10f);
 
             #endregion
-
 
             #region Timeline UI Colors
 
