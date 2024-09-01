@@ -52,7 +52,7 @@ namespace ShalltyUtils
 #elif HS2
         public const string PluginNameInternal = "HS2_ShalltyUtils";
 #endif
-        public const string Version = "1.2";
+        public const string Version = "1.3";
         public const int _uniqueId = ('S' << 24) | ('U' << 16) | ('T' << 8);
         internal static new ManualLogSource Logger;
         internal Dictionary<Transform, GuideObject> _allGuideObjects;
@@ -114,7 +114,6 @@ namespace ShalltyUtils
         private static bool constraintWithParent = false;
 
         #endregion
-
 
         public static IEnumerable<ObjectCtrlInfo> selectedObjects;
         public static ObjectCtrlInfo firstObject;
@@ -2622,7 +2621,18 @@ namespace ShalltyUtils
                 {
                     Logger.LogError("Could not load data for OCI.\n" + document.FirstChild + "\n" + e);
                 }
-                _timeline.UpdateInterpolablesView();
+
+                try
+                {
+                    bool isPlaying = _timeline._isPlaying;
+                    _timeline._isPlaying = true;
+                    _timeline.UpdateCursor();
+                    _timeline.Interpolate(true);
+                    _timeline.Interpolate(false);
+                    _timeline._isPlaying = isPlaying;
+                    _timeline.UpdateInterpolablesView();
+                }
+                catch { }
             }
         }
 
@@ -2844,7 +2854,7 @@ namespace ShalltyUtils
             }
             catch (Exception e)
             {
-                Logger.LogError("Couldn't load interpolable with the following XML:\n" + interpolableNode.OuterXml + "\n" + e);
+                Logger.LogWarning("Failed to load an Inteporlable: " + e.Message);
                 if (added)
                     _timeline.RemoveInterpolable(interpolable);
             }
@@ -3379,7 +3389,10 @@ namespace ShalltyUtils
 
         public static void SelectLinkedGuideObject(PointerEventData e)
         {
-            if (!Input.GetKey(KeyCode.LeftAlt) || _timeline._selectedInterpolables.Count == 0) return;
+            if (linkedGameObjectTimeline.Value == false) return;
+
+            if (_timeline._selectedInterpolables.Any(x => x.oci?.guideObject != null|| x.parameter is GuideObject) == false) return;
+
 
             _self.ExecuteDelayed2(() =>
             {
@@ -3391,17 +3404,13 @@ namespace ShalltyUtils
                 foreach (GuideObject go in new HashSet<GuideObject>(Singleton<GuideObjectManager>.Instance.hashSelectObject))
                     Singleton<GuideObjectManager>.Instance.SetDeselectObject(go);
 
-
                 Dictionary<TreeNodeObject, ObjectCtrlInfo> ocis = Singleton<Studio.Studio>.Instance.dicInfo;
-
 
                 foreach (Interpolable interpolable in _timeline._selectedInterpolables)
                 {
                     if (interpolable == null) continue;
 
-                    GuideObject linkedGuideObject = interpolable.parameter as GuideObject;
-
-                    if (linkedGuideObject != null)
+                    if (interpolable.parameter is GuideObject linkedGuideObject && linkedGuideObject != null)
                     {
                         bool hasParent = linkedGuideObject.parentGuide != null;
                         TreeNodeObject node = ocis.Where(pair => ReferenceEquals(pair.Value.guideObject, !hasParent ? linkedGuideObject : linkedGuideObject.parentGuide)).Select(pair => pair.Key).FirstOrDefault();
@@ -3409,25 +3418,34 @@ namespace ShalltyUtils
 
                         if (hasParent)
                         {
-                            ObjectCtrlInfo ctrlInfo = Studio.Studio.GetCtrlInfo(node);
-                            if (Singleton<TreeNodeCtrl>.Instance.hashSelectNode.Count != 1 || !Singleton<TreeNodeCtrl>.Instance.hashSelectNode.Contains(node))
-                                Singleton<TreeNodeCtrl>.Instance.SelectSingle(node, false);
+                            if (Singleton<TreeNodeCtrl>.Instance.hashSelectNode.Contains(node) == false)
+                            {
+                                if (Singleton<TreeNodeCtrl>.Instance.hashSelectNode.Add(node))
+                                {
+                                    if (Singleton<TreeNodeCtrl>.Instance.onSelect != null && Singleton<TreeNodeCtrl>.Instance.hashSelectNode.Count == 1)
+                                    {
+                                        Singleton<TreeNodeCtrl>.Instance.onSelect(node);
+                                    }
+                                    else if (Singleton<TreeNodeCtrl>.Instance.onSelectMultiple != null && Singleton<TreeNodeCtrl>.Instance.hashSelectNode.Count > 1)
+                                    {
+                                        Singleton<TreeNodeCtrl>.Instance.onSelectMultiple();
+                                    }
+                                    node.colorSelect = ((Singleton<TreeNodeCtrl>.Instance.hashSelectNode.Count == 1) ? Studio.Utility.ConvertColor(91, 164, 82) : Studio.Utility.ConvertColor(94, 139, 100));
+                                }
+                            }
 
-                            Singleton<GuideObjectManager>.Instance.StopSelectObject();
-                            Singleton<GuideObjectManager>.Instance.selectObject = linkedGuideObject;
+                            Singleton<GuideObjectManager>.Instance.AddSelectMultiple(linkedGuideObject);
                             linkedGuideObject.isActive = true;
                             _self.ExecuteDelayed2(() =>
                             {
                                 linkedGuideObject.SetLayer(linkedGuideObject.gameObject, LayerMask.NameToLayer("Studio/Select"));
                             });
-
                         }
                         else
                         {
                             if (!linkedGuideObject.isActive)
                             {
-
-                                Singleton<TreeNodeCtrl>.Instance.SetSelectNode(node);
+                                Singleton<TreeNodeCtrl>.Instance.AddSelectNode(node, true);
                                 if (Singleton<TreeNodeCtrl>.Instance.hashSelectNode.Contains(node))
                                 {
                                     Singleton<GuideObjectManager>.Instance.StopSelectObject();
@@ -3437,13 +3455,12 @@ namespace ShalltyUtils
                         }
 
                     }
-                    else
+                    else if (interpolable.oci != null)
                     {
-                        if (interpolable.oci != null)
-                            linkedGuideObject = interpolable.oci.guideObject;
+                        TreeNodeObject node = interpolable.oci.treeNodeObject;
+                        if (node == null) continue;
 
-                        if (linkedGuideObject != null)
-                            GuideObjectManager.Instance.selectObject = linkedGuideObject;
+                        Singleton<TreeNodeCtrl>.Instance.AddSelectNode(node, true);
                     }
                 }
             });

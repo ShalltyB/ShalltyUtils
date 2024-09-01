@@ -507,20 +507,17 @@ namespace ShalltyUtils
                 Singleton<UndoRedoManager>.Instance.Do(new UndoRedoCommands.DragAtCurrentTimeCommand(newTime, __state, new List<KeyValuePair<float, Keyframe>>(_timeline._selectedKeyframes)));
         }
         
-        /* OLD ALT SELECT LINKED GUIDEOBJECT        
-         * 
+        /*/ OLD ALT SELECT LINKED GUIDEOBJECT        
+         
         [HarmonyPostfix, HarmonyPatch(typeof(Timeline.Timeline), nameof(Timeline.Timeline.SelectAddInterpolable))]
         static void SelectAddInterpolablePostfix(Timeline.Timeline __instance, params Interpolable[] interpolables)
         {
             if (linkedGameObjectTimeline.Value)
             {
-                if (_timeline._selectedInterpolables.Count == 0 || !Input.GetKey(KeyCode.LeftAlt)) return;
+                //if (_timeline._selectedInterpolables.Count == 0 || !Input.GetKey(KeyCode.LeftAlt)) return;
 
                 _self.ExecuteDelayed2(() =>
                 {
-
-                    ShalltyUtils.Logger.LogInfo($"SelectAddInterpolablePostfix: CALLED");
-
                     foreach (TreeNodeObject _node in Singleton<TreeNodeCtrl>.Instance.hashSelectNode)
                         _node.OnDeselect();
 
@@ -528,7 +525,6 @@ namespace ShalltyUtils
 
                     foreach (GuideObject go in new HashSet<GuideObject>(Singleton<GuideObjectManager>.Instance.hashSelectObject))
                         Singleton<GuideObjectManager>.Instance.SetDeselectObject(go);
-
 
                     Dictionary<TreeNodeObject, ObjectCtrlInfo> ocis = Singleton<Studio.Studio>.Instance.dicInfo;
                     foreach (Interpolable interpolable in __instance._selectedInterpolables)
@@ -539,8 +535,6 @@ namespace ShalltyUtils
 
                         if (linkedGuideObject != null)
                         {
-
-
                             bool hasParent = linkedGuideObject.parentGuide != null;
                             TreeNodeObject node = ocis.Where(pair => ReferenceEquals(pair.Value.guideObject, !hasParent ? linkedGuideObject : linkedGuideObject.parentGuide)).Select(pair => pair.Key).FirstOrDefault();
                             if (node == null) return;
@@ -573,8 +567,6 @@ namespace ShalltyUtils
                                     }
                                 }
                             }
-
-
 
                             /*
                             bool hasParent = linkedGuideObject.parentGuide != null;
@@ -614,10 +606,9 @@ namespace ShalltyUtils
                             if (linkedGuideObject != null)
                                 GuideObjectManager.Instance.selectObject = linkedGuideObject;
                         }
-                    
 
                     }
-                }, 5);
+                }, 10);
             }
 
         }*/
@@ -643,15 +634,11 @@ namespace ShalltyUtils
                     }
                 }
 
-                if (linkedGameObjectTimeline.Value)
-                {
-                    var pointer = display.container.gameObject.GetComponent<PointerDownHandler>();
-                    if (pointer == null) return;
+                var pointer = display.container.gameObject.GetComponent<PointerDownHandler>();
+                if (pointer == null) return;
 
-
-                    pointer.onPointerDown -= SelectLinkedGuideObject;
-                    pointer.onPointerDown += SelectLinkedGuideObject;
-                }
+                pointer.onPointerDown -= SelectLinkedGuideObject;
+                pointer.onPointerDown += SelectLinkedGuideObject;
             }
 
         }
